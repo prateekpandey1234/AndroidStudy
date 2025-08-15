@@ -3,20 +3,24 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
 
-    id("kotlin-kapt")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.google.gms.google.services)
+}
+
+hilt {
+    enableAggregatingTask = false
 }
 
 android {
     namespace = "com.pcompany.fitandupdate"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pcompany.fitandupdate"
         minSdk = 25
         //noinspection OldTargetApi
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -85,8 +89,8 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     // Dagger - Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
-    kapt(libs.androidx.hilt.compiler)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.extensions)
@@ -113,11 +117,11 @@ dependencies {
 //    testImplementation (libs.mockito.junit)
 
     implementation( "androidx.paging:paging-runtime-ktx:3.1.1")
-    implementation ("com.squareup.okhttp3:logging-interceptor:3.10.0")
-
+    implementation("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.2")
     implementation ("androidx.paging:paging-compose:1.0.0-alpha18")
 
-    implementation ("com.squareup.retrofit2:converter-gson:2.4.0")
+    implementation ("com.squareup.retrofit2:converter-gson:3.0.0")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")

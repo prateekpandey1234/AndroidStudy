@@ -13,7 +13,7 @@ interface  NewsDAO {
     @Query("SELECT * FROM news_db")
     suspend fun getAllNews(): List<NewsEntity>
 
-    @Query("DELETE FROM news_db WHERE expiredOn < :time")
+    @Query("DELETE FROM news_db WHERE expiredOn <= :time")
     suspend fun clearCache(time:Long)
 
     @Query("DELETE FROM news_db")

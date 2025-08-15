@@ -4,9 +4,10 @@ androidxJunit = "1.1.5"
 constraintlayoutCompose = "1.1.1"
 core = "1.6.1"
 coreTesting = "2.2.0"
-hiltAndroid = "2.43.2"
+hiltAndroid = "2.48"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.0.21"
+k1 = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -80,8 +81,9 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "k1" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 
 

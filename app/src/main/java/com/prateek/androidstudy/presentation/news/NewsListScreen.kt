@@ -1,11 +1,16 @@
 package com.prateek.androidstudy.presentation.news
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,19 +25,33 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.prateek.androidstudy.data.remote.newsApi.Article
 import com.prateek.androidstudy.data.remote.newsApi.Source
+import com.prateek.androidstudy.utils.ListPagination
+import com.prateek.androidstudy.viewmodel.News.NewsListUi
 
 @Composable
 fun NewsListScreen(
-    articles: List<Article>,
+    state: NewsListUi,
     modifier: Modifier = Modifier,
-    onArticleClick: (Article) -> Unit = {}
+    onArticleClick: (Article) -> Unit = {},
+    paginateNews:()->Unit={}
 ) {
-    LazyColumn(
+    val listState = rememberLazyListState()
+    val shouldPaginate = remember {
+        derivedStateOf{
+            state.canPaginate && (listState.firstVisibleItemIndex) >= (listState.layoutInfo.totalItemsCount - 6)
+        }
+    }
+
+    LaunchedEffect(key1 = shouldPaginate.value) {
+        Log.d("NewsListScreen", "shouldPaginate: ${shouldPaginate.value} +${state.canPaginate}+ ${state.state}")
+        if (shouldPaginate.value && state.state== ListPagination.IDLE) paginateNews()
+    }
+    LazyColumn(state=listState,
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(articles) { article ->
+        items(state.newsList) { article ->
             ArticleCard(
                 article = article,
                 onClick = { onArticleClick(article) }
@@ -169,29 +188,5 @@ fun ArticleCardPreview() {
 @Composable
 fun NewsListScreenPreview() {
     MaterialTheme {
-        NewsListScreen(
-            articles = listOf(
-                Article(
-                    source = Source(id = "1", name = "TechCrunch"),
-                    author = "John Doe",
-                    title = "Breaking: New Android Development Framework Released",
-                    description = "A revolutionary new framework for Android development has been announced.",
-                    url = "https://example.com",
-                    urlToImage = "https://example.com/image.jpg",
-                    publishedAt = "2024-01-15T10:30:00Z",
-                    content = "Full article content here..."
-                ),
-                Article(
-                    source = Source(id = "2", name = "Android Authority"),
-                    author = "Jane Smith",
-                    title = "Top 10 Android Apps of 2024",
-                    description = "Discover the most innovative and useful Android apps released this year.",
-                    url = "https://example.com",
-                    urlToImage = null,
-                    publishedAt = "2024-01-14T15:45:00Z",
-                    content = "Full article content here..."
-                )
-            )
-        )
     }
 }

@@ -1,5 +1,6 @@
 package com.prateek.androidstudy.viewmodel.News
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.room.withTransaction
 import com.prateek.androidstudy.data.local.newsApi.NewsDAO
 import com.prateek.androidstudy.data.local.newsApi.NewsDb
 import com.prateek.androidstudy.data.local.newsApi.NewsEntity
+import com.prateek.androidstudy.data.local.newsApi.toArticle
 import com.prateek.androidstudy.data.remote.newsApi.Article
 import com.prateek.androidstudy.data.remote.newsApi.NewsApiService
 import com.prateek.androidstudy.data.remote.newsApi.NewsDto
@@ -32,34 +34,23 @@ class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private va
 //    var canPaginate by mutableStateOf(false)
 //    var listState by mutableStateOf(ListPagination.IDLE)
 
-    var _uiState = MutableStateFlow<NewsListUi>(NewsListUi(0,  mutableListOf(),ListPagination.IDLE,true))
+    var _uiState = MutableStateFlow<NewsListUi>(NewsListUi(1,  mutableListOf(),ListPagination.IDLE,true))
     val uiState:StateFlow<NewsListUi> = _uiState
 
     init{
-
+        getNews()
     }
     fun getNews() = viewModelScope.launch {
-        _uiState.value = NewsListUi(0, mutableListOf(),ListPagination.IDLE,true)
+
         if(_uiState.value.currPage==1 || (_uiState.value.currPage!=1 && _uiState.value.canPaginate) && _uiState.value.state == ListPagination.IDLE){
+
             _uiState.value= _uiState.value.copy(state = if(_uiState.value.currPage==1)ListPagination.LOADING else ListPagination.PAGINATING)
 
+            val response = newsApiService.getNews("soccer",_uiState.value.currPage,20)
 
-            val response = newsApiService.getNews("football",_uiState.value.currPage,20)
-            if(response.status.equals("ok",true)){
-                _uiState.value= _uiState.value.copy(canPaginate = response.articles.size == 20)
-
-                if (_uiState.value.currPage == 1) {
-                    _uiState.value = _uiState.value.copy(newsList = mutableListOf())
-                    _uiState.value = _uiState.value.copy(newsList = response.articles.toMutableList())
-                } else {
-                    _uiState.value.newsList.addAll(response.articles)
-                }
-
-                _uiState.value = _uiState.value.copy(state = ListPagination.IDLE)
-//                listState = ListState.IDLE
-
-                if (_uiState.value.canPaginate)
-                    _uiState.value = _uiState.value.copy(currPage = _uiState.value.currPage + 1)
+            if(response.isSuccessful && response.body()!=null && response.body()?.status.equals("ok",true)){
+                _uiState.value= _uiState.value.copy(canPaginate =   response.body()?.articles?.size == 20)
+                handleNewsResponse(response.body()?: NewsDto("",0, listOf()))
             } else {
                 _uiState.value = _uiState.value.copy(state = if (_uiState.value.currPage == 1) ListPagination.ERROR else ListPagination.PAGINATION_EXHAUST)
             }
@@ -69,22 +60,20 @@ class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private va
 
     fun handleNewsResponse(response:NewsDto)=viewModelScope.launch{
         val currentTime = System.currentTimeMillis()
-        val expiredAt = currentTime + (1000 * 60 * 60 * 24)
+        val expiredAt = currentTime + (1000 * 60 )
         try{
-            newsDb.withTransaction {
+            newsDb.withTransaction {// with transaction allows to rollback db and handle db queries if any one of transaction fails
                 newsDb.dao.clearCache(currentTime)
                 newsDb.dao.upsertAll(response.articles.map { it.toNewsEntity(expiredAt) }.toList())
-//                if(currPage==1){
-//                    paginatedList.clear()
-//
-//                }
+                _uiState.value.newsList.addAll(newsDb.dao.getAllNews().map { it.toArticle() }.toList())
+                _uiState.value = _uiState.value.copy(state = ListPagination.IDLE)
+                if (_uiState.value.canPaginate) _uiState.value = _uiState.value.copy(currPage = _uiState.value.currPage + 1)
+                Log.d("currPage",currentTime.toString())
             }
-
         }
         catch (e:Exception){
             e.printStackTrace()
         }
-
     }
 
 }
