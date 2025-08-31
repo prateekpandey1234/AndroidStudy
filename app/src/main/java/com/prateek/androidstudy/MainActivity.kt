@@ -15,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.prateek.androidstudy.presentation.news.NewsListScreen
+import com.prateek.androidstudy.presentation.websocket.WebSocketChatScreen
 import com.prateek.androidstudy.ui.theme.AndroidStudyTheme
 import com.prateek.androidstudy.viewmodel.News.NewsApiViewModel
+import com.prateek.androidstudy.viewmodel.websocket.WebSocketViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,13 +29,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel : NewsApiViewModel = hiltViewModel()
 
+            val webSocketViewModel : WebSocketViewModel = hiltViewModel()
+
             AndroidStudyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                    val state by viewModel.uiState.collectAsState()
-                    NewsListScreen(state, modifier = Modifier.padding(innerPadding), paginateNews = {
-                        viewModel.getNews()
-                    }, onArticleClick = {})
+                    WebSocketChatScreen(modifier = Modifier.padding(innerPadding),viewModel = webSocketViewModel)
+//                    val state by viewModel.uiState.collectAsState()
+//                    NewsListScreen(state, modifier = Modifier.padding(innerPadding), paginateNews = {
+//                        viewModel.getNews()
+//                    }, onArticleClick = {})
                 }
             }
         }

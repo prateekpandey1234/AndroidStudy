@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder
 import com.prateek.androidstudy.data.local.newsApi.NewsDAO
 import com.prateek.androidstudy.data.local.newsApi.NewsDb
 import com.prateek.androidstudy.data.remote.newsApi.NewsApiService
+import com.prateek.androidstudy.data.remote.websocket.WebSocketService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,11 +48,13 @@ class AppModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(2, TimeUnit.MINUTES)
-            .writeTimeout(2, TimeUnit.MINUTES)
-            .readTimeout(2, TimeUnit.MINUTES)
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .addInterceptor(authInterceptor)
+            .readTimeout(3, TimeUnit.SECONDS)    // Shorter than ping interval
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(15, TimeUnit.SECONDS)   // Longer for complete operations
+            .pingInterval(5, TimeUnit.SECONDS)   // More reasonable than 1 second
+          // mostly used for web sockets , it helps to try catch any connectivity issue
+//            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+//            .addInterceptor(authInterceptor)
             .build()
     }
 
@@ -82,6 +85,15 @@ class AppModule {
     @Provides
     @Singleton
     fun providesNewsInterface(retrofit: Retrofit):NewsApiService = retrofit.create(NewsApiService::class.java)
+
+
+
+    //remove authorisation from http client header for web socket
+    @Provides
+    @Singleton
+    fun provideWebSocket(okHttpClient: OkHttpClient): WebSocketService {
+        return WebSocketService(okHttpClient)
+    }
 
 
 
