@@ -27,6 +27,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
+
+
     private val authInterceptor = object : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val originalRequest = chain.request()
@@ -53,9 +55,9 @@ class AppModule {
             .callTimeout(15, TimeUnit.SECONDS)   // Longer for complete operations
             .pingInterval(5, TimeUnit.SECONDS)   // More reasonable than 1 second
           // mostly used for web sockets , it helps to try catch any connectivity issue
-//            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-//            .addInterceptor(authInterceptor)
-            .build()
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addInterceptor(authInterceptor
+            ).build()
     }
 
     @Provides

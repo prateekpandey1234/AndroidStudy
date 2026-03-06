@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +48,7 @@ fun NewsListScreen(
         if (shouldPaginate.value && state.state== ListPagination.IDLE) paginateNews()
     }
     LazyColumn(state=listState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().testTag("home_Screen_list"),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -69,6 +70,7 @@ fun ArticleCard(
 ) {
     Card(
         modifier = modifier
+            .testTag("news_item")
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(12.dp),

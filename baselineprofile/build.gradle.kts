@@ -1,0 +1,49 @@
+plugins {
+    alias(libs.plugins.android.test)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.baselineprofile)
+}
+
+android {
+    namespace = "com.pcompany.fitandupdateBaseLine"
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    defaultConfig {
+        minSdk = 28
+        targetSdk = 36
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    targetProjectPath = ":app"
+
+}
+
+// This is the configuration block for the Baseline Profile plugin.
+// You can specify to run the generators on a managed devices or connected devices.
+baselineProfile {
+    useConnectedDevices = true
+}
+
+dependencies {
+    implementation(libs.androidx.junit.v115)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.uiautomator)
+    implementation(libs.androidx.benchmark.macro.junit4)
+}
+
+androidComponents {
+    onVariants { v ->
+
+        v.instrumentationRunnerArguments.put("targetAppId", "com.pcompany.fitandupdate")
+    }
+}

@@ -6,6 +6,7 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.baselineprofile)
 }
 
 hilt {
@@ -73,11 +74,14 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.profileinstaller)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    baselineProfile(project(":baselineprofile"))
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     //infraconnect dependencies
@@ -128,4 +132,21 @@ dependencies {
 
     // For AndroidX architecture components (if needed)
     testImplementation (libs.androidx.core.testing)
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Unit Testing (JVM)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:5.3.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("com.google.truth:truth:1.1.4")
+
+    // Instrumented Testing (Android)
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+
+    testImplementation("app.cash.turbine:turbine:1.0.0")
 }

@@ -27,12 +27,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private val newsApiService: NewsApiService):ViewModel(){
-//    val paginatedList = mutableStateListOf<List<Article>>()
-//
-//    var currPage by mutableStateOf(1)
-//    // to check for errors in if further pagination can be made or there is some sort of error
-//    var canPaginate by mutableStateOf(false)
-//    var listState by mutableStateOf(ListPagination.IDLE)
+    val paginatedList = mutableStateListOf<List<Article>>()
+
+    var currPage by mutableStateOf(1)
+    // to check for errors in if further pagination can be made or there is some sort of error
+    var canPaginate by mutableStateOf(false)
+    var listState by mutableStateOf(ListPagination.IDLE)
 
     var _uiState = MutableStateFlow<NewsListUi>(NewsListUi(1,  mutableListOf(),ListPagination.IDLE,true))
     val uiState:StateFlow<NewsListUi> = _uiState
@@ -42,14 +42,14 @@ class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private va
     }
     fun getNews() = viewModelScope.launch {
 
-        if(_uiState.value.currPage==1 || (_uiState.value.currPage!=1 && _uiState.value.canPaginate) && _uiState.value.state == ListPagination.IDLE){
+        if( _uiState.value.canPaginate && _uiState.value.state == ListPagination.IDLE){
 
             _uiState.value= _uiState.value.copy(state = if(_uiState.value.currPage==1)ListPagination.LOADING else ListPagination.PAGINATING)
 
             val response = newsApiService.getNews("soccer",_uiState.value.currPage,20)
 
             if(response.isSuccessful && response.body()!=null && response.body()?.status.equals("ok",true)){
-                _uiState.value= _uiState.value.copy(canPaginate =   response.body()?.articles?.size == 20)
+                _uiState.value= _uiState.value.copy(currPage = _uiState.value.currPage+1,canPaginate =   response.body()?.articles?.size == 20)
                 handleNewsResponse(response.body()?: NewsDto("",0, listOf()))
             } else {
                 _uiState.value = _uiState.value.copy(state = if (_uiState.value.currPage == 1) ListPagination.ERROR else ListPagination.PAGINATION_EXHAUST)
