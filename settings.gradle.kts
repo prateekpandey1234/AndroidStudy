@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "AndroidStudy"
 include(":app")
 include(":baselineprofile")
+include(":StudyBenchMarking")

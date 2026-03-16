@@ -2,17 +2,25 @@ package com.prateek.androidstudy
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.GsonBuilder
+import com.prateek.androidstudy.data.local.newsApi.NewsDb
 import com.prateek.androidstudy.data.remote.newsApi.NewsApiService
 import com.prateek.androidstudy.viewmodel.News.NewsApiViewModel
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import okhttp3.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.HttpURLConnection
@@ -25,7 +33,15 @@ class RepoTests {
     //retrofit instance
     private lateinit var newsApiService: NewsApiService
 
+    private  var newsDb = mock<NewsDb>()
 
+    private var testDispatcher = StandardTestDispatcher()
+    private lateinit var viewModel: NewsApiViewModel
+
+
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup(){
         mockServer = MockWebServer()
@@ -37,13 +53,19 @@ class RepoTests {
                 .create()))
             .build().create(NewsApiService::class.java)
 
+        Dispatchers.setMain(testDispatcher)// sets the dispacther to main thread
+
+        viewModel = NewsApiViewModel(newsDb,newsApiService)
+
 
 
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun teardown(){
         mockServer.shutdown()
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -104,12 +126,11 @@ class RepoTests {
 
 
     }
-
+    //
     @Test
     fun  `test StateFlow ui State`(){
         // we can use . value way to directly check if the update worked ..
 
-        val viewModel = NewsApiViewModel()
 
         // 1. Check initial state
         assertEquals("Loading", viewModel.uiState.value)
@@ -120,6 +141,8 @@ class RepoTests {
         // 3. Check the new state
         assertEquals("Success", viewModel.uiState.value)
     }
+
+
 
 
 
