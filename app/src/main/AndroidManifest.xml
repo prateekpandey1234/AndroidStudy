@@ -30,4 +30,12 @@
         </activity>
     </application>
 
+    <activity
+        android:name="com.prateek.androidstudy.viewmodel.videoStreams.ExoPlayerInternals"
+        android:exported="true"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AndroidStudy"/>
+
+
+
 </manifest>
