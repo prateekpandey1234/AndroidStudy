@@ -266,6 +266,10 @@ class VideoPlayerViewModel @Inject constructor(@ApplicationContext private val c
         }
     }
 
+    fun toggleFullScreen() {
+        _uiState.value = _uiState.value?.copy(isFullScreen = !(_uiState.value?.isFullScreen ?: false))
+    }
+
     fun observerRunTime() {
         viewModelScope.launch {
             while (isActive) {

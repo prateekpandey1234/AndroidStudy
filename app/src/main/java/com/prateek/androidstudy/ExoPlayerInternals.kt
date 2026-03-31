@@ -1,5 +1,8 @@
 package com.prateek.androidstudy
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
@@ -27,6 +30,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -52,37 +57,61 @@ import dagger.hilt.android.AndroidEntryPoint
 @UnstableApi
 class ExoPlayerInternals : ComponentActivity() {
 
+    @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val viewModel: VideoPlayerViewModel = hiltViewModel()
             val playerUiState by viewModel.uiState.observeAsState()
+            val context = LocalContext.current as Activity
+
             AndroidStudyTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        playerUiState?.let { uiState ->
+                    playerUiState?.let { uiState ->
+                        // Handle orientation change
+                        SideEffect {
+                            context.requestedOrientation = if (uiState.isFullScreen) {
+                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            } else {
+                                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                            }
+                        }
+
+                        val playerModifier = if (uiState.isFullScreen) {
+                            Modifier.fillMaxSize()
+                        } else {
+                            Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                        }
+
+                        if (uiState.isFullScreen) {
                             VideoPlayer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(16f / 9f),
+                                modifier = playerModifier,
                                 uiState = uiState,
-                                onResolutionSelected = { resolution ->
-                                    viewModel.setResolution(resolution)
-                                },
-                                onSeekChanged = {
-                                    viewModel.seekBarLoad(it)
-                                },
-                                onPlayPauseToggle = {
-                                    viewModel.togglePlayPause()
-                                }
+                                onResolutionSelected = { viewModel.setResolution(it) },
+                                onSeekChanged = { viewModel.seekBarLoad(it) },
+                                onPlayPauseToggle = { viewModel.togglePlayPause() },
+                                onFullScreenToggle = { viewModel.toggleFullScreen() }
                             )
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                VideoPlayer(
+                                    modifier = playerModifier,
+                                    uiState = uiState,
+                                    onResolutionSelected = { viewModel.setResolution(it) },
+                                    onSeekChanged = { viewModel.seekBarLoad(it) },
+                                    onPlayPauseToggle = { viewModel.togglePlayPause() },
+                                    onFullScreenToggle = { viewModel.toggleFullScreen() }
+                                )
+                            }
                         }
                     }
                 }
@@ -96,9 +125,10 @@ class ExoPlayerInternals : ComponentActivity() {
         uiState: PlayerUiState,
         onResolutionSelected: (String) -> Unit,
         onSeekChanged: (Float) -> Unit,
-        onPlayPauseToggle: () -> Unit
+        onPlayPauseToggle: () -> Unit,
+        onFullScreenToggle: () -> Unit
     ) {
-        VideoSurface(modifier, uiState, onResolutionSelected, onSeekChanged, onPlayPauseToggle)
+        VideoSurface(modifier, uiState, onResolutionSelected, onSeekChanged, onPlayPauseToggle, onFullScreenToggle)
     }
 
     @Composable
@@ -107,7 +137,8 @@ class ExoPlayerInternals : ComponentActivity() {
         uiState: PlayerUiState,
         onResolutionSelected: (String) -> Unit,
         onSeekChanged: (Float) -> Unit,
-        onPlayPauseToggle: () -> Unit
+        onPlayPauseToggle: () -> Unit,
+        onFullScreenToggle: () -> Unit
     ) {
         var showResolutions by remember { mutableStateOf(false) }
 
@@ -149,7 +180,21 @@ class ExoPlayerInternals : ComponentActivity() {
                  }
              }
 
-            // 3. Settings Icon (Top End)
+            // 3. Top Left - Fullscreen Icon
+            IconButton(
+                onClick = onFullScreenToggle,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = if (uiState.isFullScreen) ImageVector.vectorResource(R.drawable.outline_close_fullscreen_24) else ImageVector.vectorResource(R.drawable.outline_fullscreen_24),
+                    contentDescription = "Toggle Fullscreen",
+                    tint = Color.White
+                )
+            }
+
+            // 4. Top Right - Settings Icon
              Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -184,7 +229,7 @@ class ExoPlayerInternals : ComponentActivity() {
                 }
             }
 
-            // 4. Bottom Controls (Slider + Timestamps)
+            // 5. Bottom Controls (Slider + Timestamps)
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
