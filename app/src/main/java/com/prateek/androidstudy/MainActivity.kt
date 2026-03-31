@@ -25,7 +25,7 @@ import com.prateek.androidstudy.presentation.news.NewsListScreen
 import com.prateek.androidstudy.presentation.websocket.WebSocketChatScreen
 import com.prateek.androidstudy.ui.theme.AndroidStudyTheme
 import com.prateek.androidstudy.viewmodel.News.NewsApiViewModel
-import com.prateek.androidstudy.viewmodel.videoStreams.ExoPlayerInternals
+import com.prateek.androidstudy.ExoPlayerInternals
 import com.prateek.androidstudy.viewmodel.websocket.WebSocketViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel : NewsApiViewModel = hiltViewModel()
+//            val viewModel : NewsApiViewModel = hiltViewModel()
 
 //            val webSocketViewModel : WebSocketViewModel = hiltViewModel()
             startActivity(Intent(this, ExoPlayerInternals::class.java))
