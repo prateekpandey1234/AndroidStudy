@@ -55,7 +55,7 @@ class VideoPlayerViewModel @Inject constructor(@ApplicationContext private val c
     val uiState: LiveData<PlayerUiState> = _uiState
 
     init {
-        initPlayer()
+
     }
 
 
@@ -149,7 +149,7 @@ class VideoPlayerViewModel @Inject constructor(@ApplicationContext private val c
     }
 
     @OptIn(UnstableApi::class)
-    fun initPlayer() {
+    fun initPlayer(url:String) {
         if (_uiState.value?.player != null) return
 
         val trackSelector = DefaultTrackSelector(context, AdaptiveTrackSelection.Factory())
@@ -247,8 +247,9 @@ class VideoPlayerViewModel @Inject constructor(@ApplicationContext private val c
                     }
                 })
                 // Use the live stream URL provided by the user
+                val streamUrl = url.replace("localhost", "10.0.2.2")
                 val mediaItem =
-                    MediaItem.fromUri("https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd")
+                    MediaItem.fromUri(streamUrl)
                 setMediaItem(mediaItem)
                 prepare()
             }

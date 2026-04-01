@@ -1,5 +1,6 @@
 package com.prateek.androidstudy.data.remote.newsApi
 
+import com.prateek.androidstudy.data.remote.liveStream.StreamResponse
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -14,5 +15,8 @@ interface NewsApiService{
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int,
     ): Response<NewsDto>
+
+    @GET("api/streams")
+    suspend fun getStreamList(): Response<StreamResponse>
 }
 

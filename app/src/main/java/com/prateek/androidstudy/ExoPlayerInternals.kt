@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +31,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -60,11 +62,16 @@ class ExoPlayerInternals : ComponentActivity() {
     @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val url = intent.getStringExtra("url")
 
         setContent {
             val viewModel: VideoPlayerViewModel = hiltViewModel()
             val playerUiState by viewModel.uiState.observeAsState()
             val context = LocalContext.current as Activity
+            LaunchedEffect(Unit) {
+                Log.d("streamUrl",url.toString())
+                viewModel.initPlayer(url!!)
+            }
 
             AndroidStudyTheme {
                 Surface(

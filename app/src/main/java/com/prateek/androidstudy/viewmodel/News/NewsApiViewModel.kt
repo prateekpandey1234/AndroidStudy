@@ -13,6 +13,7 @@ import com.prateek.androidstudy.data.local.newsApi.NewsDAO
 import com.prateek.androidstudy.data.local.newsApi.NewsDb
 import com.prateek.androidstudy.data.local.newsApi.NewsEntity
 import com.prateek.androidstudy.data.local.newsApi.toArticle
+import com.prateek.androidstudy.data.remote.liveStream.ActiveStream
 import com.prateek.androidstudy.data.remote.newsApi.Article
 import com.prateek.androidstudy.data.remote.newsApi.NewsApiService
 import com.prateek.androidstudy.data.remote.newsApi.NewsDto
@@ -37,8 +38,13 @@ class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private va
     var _uiState = MutableStateFlow<NewsListUi>(NewsListUi(1,  mutableListOf(),ListPagination.IDLE,true))
     val uiState:StateFlow<NewsListUi> = _uiState
 
+    private var _streamState = MutableStateFlow<StreamList>(StreamList(listOf(),true))
+    val streamState:StateFlow<StreamList> = _streamState
+
+
     init{
-        getNews()
+
+
     }
     fun getNews() = viewModelScope.launch {
 
@@ -55,6 +61,13 @@ class NewsApiViewModel @Inject constructor(private val newsDb: NewsDb,private va
                 _uiState.value = _uiState.value.copy(state = if (_uiState.value.currPage == 1) ListPagination.ERROR else ListPagination.PAGINATION_EXHAUST)
             }
 
+        }
+    }
+
+    fun getStreams() = viewModelScope.launch {
+        val response = newsApiService.getStreamList()
+        if(response.isSuccessful && response.body()!=null){
+            _streamState.value = _streamState.value.copy(data = response.body()!!.streams)
         }
     }
 
@@ -84,4 +97,9 @@ data class NewsListUi(
     val newsList:MutableList<Article>,
     val state:ListPagination,
     val canPaginate:Boolean
+)
+
+data class StreamList(
+    var data : List<ActiveStream>,
+    var success:Boolean
 )
