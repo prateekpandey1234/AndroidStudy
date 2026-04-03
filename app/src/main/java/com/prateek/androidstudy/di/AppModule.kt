@@ -33,7 +33,7 @@ class AppModule {
         override fun intercept(chain: Interceptor.Chain): Response {
             val originalRequest = chain.request()
             val requestBuilder = originalRequest.newBuilder()
-            requestBuilder.addHeader("Authorization", "6afebde1a6fc488b83d7b3d3ba184fec")
+            requestBuilder.addHeader("Authorization", "lolz")
             requestBuilder.addHeader("Content-Type", "application/json")
             val newRequest = requestBuilder.build()
             return chain.proceed(newRequest)
@@ -64,7 +64,7 @@ class AppModule {
     @Singleton
     fun provideRetrofit(gson: Gson, okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/")
+            .baseUrl("i.pi.")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(okHttpClient)
             .build()

@@ -247,7 +247,7 @@ class VideoPlayerViewModel @Inject constructor(@ApplicationContext private val c
                     }
                 })
                 // Use the live stream URL provided by the user
-                val streamUrl = url.replace("localhost", "10.0.2.2")
+                val streamUrl = url.replace("localhost", "------")
                 val mediaItem =
                     MediaItem.fromUri(streamUrl)
                 setMediaItem(mediaItem)
